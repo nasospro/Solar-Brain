@@ -1,1 +1,13 @@
-"data/" 
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# Data & Models
+*.db
+*.pkl
+
+# OS files
+.DS_Store
+Thumbs.db

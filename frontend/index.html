@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <title>☀️ SolarBrain AI Monitor</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☀️</text></svg>">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #0e1117; color: white; padding: 40px; }
+        .dashboard-container { max-width: 1200px; margin: auto; }
+        
+        /* Στυλ για τα 4 κουτιά (Metrics) */
+        .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; }
+        .metric-card { background: #161b22; padding: 20px; border-radius: 10px; border: 1px solid #30363d; text-align: center; }
+        .metric-label { color: #8b949e; font-size: 0.85rem; margin-bottom: 8px; text-transform: uppercase; }
+        .metric-value { font-size: 1.6rem; font-weight: bold; }
+        
+        /* Στυλ για το ποσοστό κάτω από το σφάλμα */
+        .metric-subvalue { font-size: 0.9rem; margin-top: 4px; opacity: 0.8; }
+
+        /* Χρώματα για κάθε κατηγορία */
+        .actual-val { color: #FFA500; }
+        .pred-val { color: #00F0FF; }
+        .error-val { color: #eb4034; }
+        .money-val { color: #4ade80; }
+
+        .chart-box { background: #161b22; padding: 25px; border-radius: 10px; border: 1px solid #30363d; margin-bottom: 30px; }
+        
+        .logs-section { background: #161b22; padding: 20px; border-radius: 10px; border: 1px solid #30363d; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.85rem; }
+        th { text-align: left; color: #8b949e; padding: 12px; border-bottom: 2px solid #30363d; }
+        td { padding: 12px; border-bottom: 1px solid #21262d; }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>☀️ SolarBrain Live: AI Prediction Analysis</h1>
+        <hr style="border: 0.5px solid #30363d; margin-bottom: 30px;">
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">Actual Power</div>
+                <div id="metric-actual" class="metric-value actual-val">0.00 W</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">AI Prediction</div>
+                <div id="metric-pred" class="metric-value pred-val">0.00 W</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Error (Gap & %)</div>
+                <div id="metric-abs-error" class="metric-value error-val">0.00 W</div>
+                <div id="metric-percent-error" class="metric-subvalue error-val">0.0%</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Revenue Est.</div>
+                <div id="metric-money" class="metric-value money-val">0.00 €/h</div>
+            </div>
+        </div>
+
+        <div class="chart-box">
+            <canvas id="solarChart"></canvas>
+        </div>
+
+        <div class="logs-section">
+            <h3 style="margin-top:0">Recent Logs (Live Feed)</h3>
+            <table id="logs-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Irradiance</th>
+                        <th>Temp</th>
+                        <th>Actual (W)</th>
+                        <th>AI Pred (W)</th>
+                        <th>Error %</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <p id="status" style="text-align: center; color: #8b949e; margin-top: 20px; font-size: 0.8rem;">Connecting...</p>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('solarChart').getContext('2d');
+        const solarChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    { label: 'Actual Power', data: [], borderColor: '#FFA500', borderWidth: 3, tension: 0.3, fill: false, pointRadius: 3 },
+                    { label: 'AI Prediction', data: [], borderColor: '#00F0FF', borderWidth: 2, borderDash: [5, 5], tension: 0.3, fill: false, pointRadius: 0 }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { grid: { color: '#30363d' }, ticks: { color: '#8b949e' } },
+                    x: { grid: { display: false }, ticks: { color: '#8b949e' } }
+                },
+                plugins: { legend: { labels: { color: 'white' } } }
+            }
+        });
+
+        async function updateData() {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/data');
+                const data = await response.json();
+                const latest = data[0];
+                const reversedData = [...data].reverse();
+
+                // Υπολογισμοί
+                const KWH_PRICE = 0.22; // Τιμή κιλοβατώρας
+                const absError = Math.abs(latest.power - (latest.predicted_power || 0));
+                const errorP = latest.power > 0 ? (absError / latest.power * 100) : 0;
+                const revenue = (latest.power / 1000) * KWH_PRICE;
+
+                // Ενημέρωση των κουτιών (Metrics)
+                document.getElementById('metric-actual').innerText = `${latest.power.toFixed(2)} W`;
+                document.getElementById('metric-pred').innerText = `${(latest.predicted_power || 0).toFixed(2)} W`;
+                document.getElementById('metric-abs-error').innerText = `${absError.toFixed(2)} W`;
+                document.getElementById('metric-percent-error').innerText = `(${errorP.toFixed(1)}%)`;
+                document.getElementById('metric-money').innerText = `${revenue.toFixed(3)} €/h`;
+
+                // Ενημέρωση Διαγράμματος
+                solarChart.data.labels = reversedData.map(d => d.id);
+                solarChart.data.datasets[0].data = reversedData.map(d => d.power);
+                solarChart.data.datasets[1].data = reversedData.map(d => d.predicted_power);
+                solarChart.update('none');
+
+                // Ενημέρωση Πίνακα (Logs)
+                const tbody = document.querySelector('#logs-table tbody');
+                tbody.innerHTML = data.slice(0, 7).map(row => {
+                    const err = Math.abs(row.power - (row.predicted_power || 0));
+                    const errP = row.power > 0 ? (err / row.power * 100) : 0;
+                    return `
+                        <tr>
+                            <td>${row.id}</td>
+                            <td>${row.irradiance.toFixed(3)}</td>
+                            <td>${row.temperature.toFixed(1)}°C</td>
+                            <td class="actual-val">${row.power.toFixed(2)}</td>
+                            <td class="pred-val">${(row.predicted_power || 0).toFixed(2)}</td>
+                            <td style="color: #8b949e">${errP.toFixed(1)}%</td>
+                        </tr>
+                    `;
+                }).join('');
+
+                document.getElementById('status').innerText = `Last Sync: ${new Date().toLocaleTimeString()}`;
+            } catch (e) { 
+                document.getElementById('status').innerText = "API Offline - Check your Backend";
+            }
+        }
+
+        // Ανανέωση κάθε 3 δευτερόλεπτα
+        setInterval(updateData, 3000);
+        updateData();
+    </script>
+</body>
+</html>

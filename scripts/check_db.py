@@ -1,5 +1,11 @@
 import sqlite3
-conn = sqlite3.connect('solar_brain.db')
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(BASE_DIR)
+DB_PATH = os.path.join(PROJECT_ROOT, 'data', 'solar_brain.db')
+
+conn = sqlite3.connect(DB_PATH)
 cursor = conn.cursor()
 
 
