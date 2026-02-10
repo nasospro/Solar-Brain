@@ -11,16 +11,17 @@
         body { font-family: 'Inter', sans-serif; background: #0e1117; color: white; padding: 40px; }
         .dashboard-container { max-width: 1200px; margin: auto; }
         
-        /* Στυλ για τα 4 κουτιά (Metrics) */
+        /* Header με τον επιλογέα τιμής */
+        .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .price-selector { background: #161b22; padding: 10px 20px; border-radius: 8px; border: 1px solid #30363d; }
+        select { background: #0e1117; color: #4ade80; border: 1px solid #4ade80; padding: 5px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+
         .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; }
         .metric-card { background: #161b22; padding: 20px; border-radius: 10px; border: 1px solid #30363d; text-align: center; }
         .metric-label { color: #8b949e; font-size: 0.85rem; margin-bottom: 8px; text-transform: uppercase; }
         .metric-value { font-size: 1.6rem; font-weight: bold; }
-        
-        /* Στυλ για το ποσοστό κάτω από το σφάλμα */
         .metric-subvalue { font-size: 0.9rem; margin-top: 4px; opacity: 0.8; }
 
-        /* Χρώματα για κάθε κατηγορία */
         .actual-val { color: #FFA500; }
         .pred-val { color: #00F0FF; }
         .error-val { color: #eb4034; }
@@ -36,7 +37,19 @@
 </head>
 <body>
     <div class="dashboard-container">
-        <h1>☀️ SolarBrain Live: AI Prediction Analysis</h1>
+        <div class="header-flex">
+            <h1>☀️ SolarBrain Live: AI Prediction Analysis</h1>
+            <div class="price-selector">
+                <label style="color: #8b949e; font-size: 0.9rem;">Τιμή kWh: </label>
+                <select id="kwh-price" onchange="updateData()">
+                    <option value="0.12">0.12 € (Χαμηλή)</option>
+                    <option value="0.18" selected>0.18 € (Μέση)</option>
+                    <option value="0.25">0.25 € (Υψηλή)</option>
+                    <option value="0.35">0.35 € (Αιχμής)</option>
+                </select>
+            </div>
+        </div>
+        
         <hr style="border: 0.5px solid #30363d; margin-bottom: 30px;">
 
         <div class="metrics-grid">
@@ -110,8 +123,8 @@
                 const latest = data[0];
                 const reversedData = [...data].reverse();
 
-                // Υπολογισμοί
-                const KWH_PRICE = 0.22; // Τιμή κιλοβατώρας
+                // ΔΥΝΑΜΙΚΟΣ ΥΠΟΛΟΓΙΣΜΟΣ ΒΑΣΕΙ ΤΟΥ SELECT
+                const KWH_PRICE = parseFloat(document.getElementById('kwh-price').value);
                 const absError = Math.abs(latest.power - (latest.predicted_power || 0));
                 const errorP = latest.power > 0 ? (absError / latest.power * 100) : 0;
                 const revenue = (latest.power / 1000) * KWH_PRICE;
@@ -152,7 +165,6 @@
             }
         }
 
-        // Ανανέωση κάθε 3 δευτερόλεπτα
         setInterval(updateData, 3000);
         updateData();
     </script>
