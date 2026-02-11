@@ -1,1 +1,1 @@
-*.ipynb linguist-vendor=true
+**/notebooks/*.ipynb linguist-detectable=false
