@@ -50,3 +50,4 @@ def get_single_latest_entry():
     if row:
         return dict(row)
     return {"error": "No records found"}
+
