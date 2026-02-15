@@ -3,15 +3,15 @@
 **SolarBrain** is a grade monitoring and predictive analytics platform for Photovoltaic (PV) systems. It bridges the gap between raw **IoT** sensor data and **Machine Learning** to provide real-time insights into energy production and performance forecasting.
 
 ## Project Overview
-**Real-Time Monitoring**: Live tracking of Irradiance, Temperature, and Power output through a web-based dashboard.
-**Performance Analysis**: Comparing actual power output against AI-predicted values to identify operational inefficiencies or "Blind Spots" like dust or hardware failures.
-**Production Forecasting**: Leveraging AI to forecast energy generation based on weather parameters to assist in grid management and reduce uncertainty.
+* **Real-Time Monitoring**: Live tracking of Irradiance, Temperature, and Power output through a web-based dashboard.
+* **Performance Analysis**: Comparing actual power output against AI-predicted values to identify operational inefficiencies or "Blind Spots" like dust or hardware failures.
+* **Production Forecasting**: Leveraging AI to forecast energy generation based on weather parameters to assist in grid management and reduce uncertainty.
 
 ## Technical Stack
-**Backend**: Python with **FastAPI**.
-**Frontend**: **HTML5**, **CSS3**, and **JavaScript** with **Plotly.js** for dynamic data visualization.
-**Database**: **SQLite3** for persistent storage of sensor measurements.
-**Machine Learning**: **Random Forest Regressor** for high-accuracy power prediction.
+* **Backend**: Python with **FastAPI**.
+* **Frontend**: **HTML5**, **CSS3**, and **JavaScript** with **Plotly.js** for dynamic data visualization.
+* **Database**: **SQLite3** for persistent storage of sensor measurements.
+* **Machine Learning**: **Random Forest Regressor** for high-accuracy power prediction.
 
 ## Project Structure
 * `main.py`: The FastAPI server that handles API routes and serves the web interface.
