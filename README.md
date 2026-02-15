@@ -1,6 +1,6 @@
 # ☀️ SolarBrain: Intelligent PV Management System
 
-**SolarBrain** is a professional-grade monitoring and predictive analytics platform for Photovoltaic (PV) systems. [cite_start]It bridges the gap between raw **IoT** sensor data and **Machine Learning** to provide real-time insights into energy production and performance forecasting[cite: 2, 17, 19].
+**SolarBrain** is a professional-grade monitoring and predictive analytics platform for Photovoltaic (PV) systems. [cite_start]It bridges the gap between raw **IoT** sensor data and **Machine Learning** to provide real-time insights into energy production and performance forecasting.
 
 ## Project Overview
 * [cite_start]**Real-Time Monitoring**: Live tracking of Irradiance, Temperature, and Power output through a web-based dashboard[cite: 17].
